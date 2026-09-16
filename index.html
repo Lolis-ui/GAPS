@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Orçamento de Software | GAPS</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+
+  <!-- Barra Superior -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 font-bold">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-base font-bold text-slate-900 leading-tight">Calculadora de Custos de Software</h1>
+          <p class="text-xs text-slate-500">Gestão de Agilidade e Projetos de Software (GAPS)</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="btn-load-demo" class="px-3.5 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors">
+          Carregar Exemplo (Hub Solidário)
+        </button>
+        <button id="btn-reset" class="px-3.5 py-1.5 text-xs font-medium border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg transition-colors">
+          Limpar
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+      <!-- Coluna Esquerda: Entrada de Dados (7 Colunas) -->
+      <div class="lg:col-span-7 space-y-6">
+
+        <!-- 1. Equipe e Capacidade da Squad -->
+        <section class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">1. Equipe e Capacidade da Squad</h2>
+              <p class="text-xs text-slate-500">Informe os membros da squad, custo mensal carregado e horas na Sprint.</p>
+            </div>
+            <button id="btn-add-member" class="px-3 py-1 text-xs font-medium bg-slate-900 hover:bg-slate-800 text-white rounded-lg transition-colors flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              Adicionar Membro
+            </button>
+          </div>
+
+          <!-- Parâmetros Globais de Horas -->
+          <div class="grid grid-cols-2 gap-4 p-3.5 bg-slate-50 rounded-xl mb-4 text-xs border border-slate-100">
+            <div>
+              <label class="block font-medium text-slate-700 mb-1">Dias Úteis por Sprint</label>
+              <input type="number" id="sprint-days" value="10" min="1" max="30" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+            </div>
+            <div>
+              <label class="block font-medium text-slate-700 mb-1">Fator de Foco Técnico (%)</label>
+              <input type="number" id="focus-factor" value="75" min="10" max="100" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+            </div>
+          </div>
+
+          <!-- Lista de Membros -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead>
+                <tr class="border-b border-slate-100 text-slate-400 font-medium">
+                  <th class="pb-2">Função / Papel</th>
+                  <th class="pb-2">Custo Mensal (R$)</th>
+                  <th class="pb-2">Horas / Sprint</th>
+                  <th class="pb-2 text-right">Subtotal</th>
+                  <th class="pb-2 text-center w-10">Ação</th>
+                </tr>
+              </thead>
+              <tbody id="members-list" class="divide-y divide-slate-100">
+                <!-- Inserido dinamicamente via JS -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 2. Custos de Infraestrutura e Nuvem -->
+        <section class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-log shadow-sm">
+          <div class="mb-4">
+            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">2. Infraestrutura e Serviços em Nuvem</h2>
+            <p class="text-xs text-slate-500">Custos operacionais mensais de hospedagem, banco de dados e APIs.</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div>
+              <label class="block font-medium text-slate-700 mb-1">API Backend (R$/mês)</label>
+              <input type="number" id="infra-api" value="35" min="0" step="0.01" class="calc-input w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" placeholder="Ex: 35.00">
+              <span class="text-[10px] text-slate-400">Ex: Render, Railway, AWS ECS</span>
+            </div>
+
+            <div>
+              <label class="block font-medium text-slate-700 mb-1">Banco de Dados (R$/mês)</label>
+              <input type="number" id="infra-db" value="125" min="0" step="0.01" class="calc-input w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" placeholder="Ex: 125.00">
+              <span class="text-[10px] text-slate-400">Ex: Supabase PostgreSQL, AWS RDS</span>
+            </div>
+
+            <div>
+              <label class="block font-medium text-slate-700 mb-1">Storage & CDN (R$/mês)</label>
+              <input type="number" id="infra-storage" value="10" min="0" step="0.01" class="calc-input w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" placeholder="Ex: 10.00">
+              <span class="text-[10px] text-slate-400">Ex: Cloudflare R2, AWS S3</span>
+            </div>
+
+            <div>
+              <label class="block font-medium text-slate-700 mb-1">Serviços / APIs / E-mail (R$/mês)</label>
+              <input type="number" id="infra-services" value="75" min="0" step="0.01" class="calc-input w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" placeholder="Ex: 75.00">
+              <span class="text-[10px] text-slate-400">Ex: Resend, SendGrid, Stripe</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. Parâmetros do Projeto e MVP -->
+        <section class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
+          <div class="mb-4">
+            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">3. Parâmetros de Escopo e Caixa</h2>
+            <p class="text-xs text-slate-500">Duração estimada do MVP, velocidade da squad e orçamento disponível.</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div>
+              <label class="block font-medium text-slate-700 mb-1">Sprints para o MVP</label>
+              <input type="number" id="mvp-sprints" value="3" min="1" max="20" class="calc-input w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+              <span class="text-[10px] text-slate-400">Ciclos de entrega previstos</span>
+            </div>
+
+            <div>
+              <label class="block font-medium text-slate-700 mb-1">Velocidade Média (Story Points / Sprint)</label>
+              <input type="number" id="sprint-points" value="25" min="1" max="200" class="calc-input w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+              <span class="text-[10px] text-slate-400">Pontuação entregue por ciclo</span>
+            </div>
+
+            <div>
+              <label class="block font-medium text-slate-700 mb-1">Margem de Contingência (%)</label>
+              <input type="number" id="contingency-rate" value="5" min="0" max="50" class="calc-input w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+              <span class="text-[10px] text-slate-400">Reserva técnica para imprevistos</span>
+            </div>
+
+            <div>
+              <label class="block font-medium text-slate-700 mb-1">Orçamento Teto Aprovado (R$)</label>
+              <input type="number" id="total-budget" value="60000" min="0" step="500" class="calc-input w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+              <span class="text-[10px] text-slate-400">Verba máxima disponível para o projeto / MVP</span>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Coluna Direita: Painel de Indicadores e Síntese (5 Colunas) -->
+      <div class="lg:col-span-5 space-y-6">
+
+        <!-- Card de Destaque: Orçamento e Viabilidade do MVP -->
+        <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-6 shadow-md border border-slate-800 relative overflow-hidden">
+          <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Custo Estimado do MVP</span>
+            <span id="badge-budget-status" class="px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              Dentro do Teto
+            </span>
+          </div>
+
+          <div class="text-3xl font-extrabold text-white tracking-tight mb-1" id="card-mvp-total">R$ 0,00</div>
+          <div class="text-xs text-slate-400 flex items-center gap-2 mb-4">
+            <span>Teto Aprovado: <strong class="text-slate-200" id="card-target-budget">R$ 60.000,00</strong></span>
+            <span>•</span>
+            <span id="card-budget-diff" class="text-emerald-400 font-medium">+ R$ 0,00 de saldo</span>
+          </div>
+
+          <!-- Barra de Consumo do Orçamento -->
+          <div class="space-y-1 mb-4">
+            <div class="flex justify-between text-[11px] text-slate-400">
+              <span>Comprometimento da Verba</span>
+              <span id="card-budget-percent" class="font-semibold text-slate-200">0%</span>
+            </div>
+            <div class="w-full bg-slate-700/60 rounded-full h-2 overflow-hidden">
+              <div id="budget-progress-bar" class="bg-emerald-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-slate-700/60 grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <span class="text-slate-400 block text-[11px]">Duração Prevista:</span>
+              <span class="font-semibold text-slate-200" id="card-mvp-sprints-count">3 Sprints (6 semanas)</span>
+            </div>
+            <div>
+              <span class="text-slate-400 block text-[11px]">Contingência Inclusa:</span>
+              <span class="font-semibold text-emerald-400" id="card-mvp-contingency">R$ 0,00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grade de Métricas Principais -->
+        <div class="grid grid-cols-2 gap-4">
+
+          <!-- Custo por Sprint -->
+          <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
+            <span class="text-[11px] font-medium text-slate-400 uppercase tracking-wider block mb-1">Custo / Sprint (Equipe)</span>
+            <div class="text-lg font-bold text-slate-900" id="card-sprint-cost">R$ 0,00</div>
+            <span class="text-[10px] text-slate-500" id="card-sprint-hours">0 horas úteis</span>
+          </div>
+
+          <!-- Custo por Story Point -->
+          <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
+            <span class="text-[11px] font-medium text-slate-400 uppercase tracking-wider block mb-1">Custo / Story Point</span>
+            <div class="text-lg font-bold text-slate-900" id="card-point-cost">R$ 0,00</div>
+            <span class="text-[10px] text-slate-500" id="card-points-rate">Base: 25 pts/sprint</span>
+          </div>
+
+          <!-- Burn Rate Mensal -->
+          <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
+            <span class="text-[11px] font-medium text-slate-400 uppercase tracking-wider block mb-1">Burn Rate Mensal</span>
+            <div class="text-lg font-bold text-slate-900" id="card-burn-rate">R$ 0,00</div>
+            <span class="text-[10px] text-slate-500">Equipe + Nuvem</span>
+          </div>
+
+          <!-- Runway Estimado -->
+          <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
+            <span class="text-[11px] font-medium text-slate-400 uppercase tracking-wider block mb-1">Runway (Sobrevida)</span>
+            <div class="text-lg font-bold text-emerald-600" id="card-runway">0,0 meses</div>
+            <span class="text-[10px] text-slate-500">Com base no teto</span>
+          </div>
+
+        </div>
+
+        <!-- Exportação em Markdown -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Exportar para o README</h3>
+            <button id="btn-copy-md" class="px-3 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-all flex items-center gap-1.5 shadow-sm">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+              </svg>
+              <span id="copy-text">Copiar Markdown</span>
+            </button>
+          </div>
+          <textarea id="markdown-output" readonly rows="8" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-[11px] font-mono text-slate-700 focus:outline-none resize-none"></textarea>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Lógica JavaScript da Aplicação -->
+  <script>
+    // Estado da Equipe
+    let members = [
+      { role: 'Tech Lead / Backend', salary: 16000, hours: 60 },
+      { role: 'Dev Backend (API)', salary: 9000, hours: 60 },
+      { role: 'Dev Frontend (Web)', salary: 9000, hours: 60 },
+      { role: 'PO / UI Designer', salary: 8000, hours: 30 }
+    ];
+
+    const demoMembers = [
+      { role: 'Tech Lead / Backend', salary: 16000, hours: 60 },
+      { role: 'Dev Backend (API)', salary: 9000, hours: 60 },
+      { role: 'Dev Frontend (Web)', salary: 9000, hours: 60 },
+      { role: 'PO / UI Designer', salary: 8000, hours: 30 }
+    ];
+
+    // Elementos DOM
+    const membersListEl = document.getElementById('members-list');
+    const sprintDaysEl = document.getElementById('sprint-days');
+    const focusFactorEl = document.getElementById('focus-factor');
+    const infraApiEl = document.getElementById('infra-api');
+    const infraDbEl = document.getElementById('infra-db');
+    const infraStorageEl = document.getElementById('infra-storage');
+    const infraServicesEl = document.getElementById('infra-services');
+    const mvpSprintsEl = document.getElementById('mvp-sprints');
+    const sprintPointsEl = document.getElementById('sprint-points');
+    const contingencyRateEl = document.getElementById('contingency-rate');
+    const totalBudgetEl = document.getElementById('total-budget');
+
+    // Cards
+    const cardMvpTotal = document.getElementById('card-mvp-total');
+    const cardTargetBudget = document.getElementById('card-target-budget');
+    const cardBudgetDiff = document.getElementById('card-budget-diff');
+    const cardBudgetPercent = document.getElementById('card-budget-percent');
+    const budgetProgressBar = document.getElementById('budget-progress-bar');
+    const badgeBudgetStatus = document.getElementById('badge-budget-status');
+    const cardMvpSprintsCount = document.getElementById('card-mvp-sprints-count');
+    const cardMvpContingency = document.getElementById('card-mvp-contingency');
+    const cardSprintCost = document.getElementById('card-sprint-cost');
+    const cardSprintHours = document.getElementById('card-sprint-hours');
+    const cardPointCost = document.getElementById('card-point-cost');
+    const cardPointsRate = document.getElementById('card-points-rate');
+    const cardBurnRate = document.getElementById('card-burn-rate');
+    const cardRunway = document.getElementById('card-runway');
+    const markdownOutput = document.getElementById('markdown-output');
+
+    // Formatação de Moeda
+    function formatCurrency(val) {
+      return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+    }
+
+    // Renderização dos Membros
+    function renderMembers() {
+      membersListEl.innerHTML = '';
+      const focus = parseFloat(focusFactorEl.value) / 100 || 0.75;
+      const effectiveMonthlyHours = 176 * focus;
+
+      members.forEach((m, idx) => {
+        const hourlyRate = effectiveMonthlyHours > 0 ? (m.salary / effectiveMonthlyHours) : 0;
+        const subtotal = hourlyRate * m.hours;
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50/50 transition-colors';
+        tr.innerHTML = `
+          <td class="py-2.5 pr-2">
+            <input type="text" value="${m.role}" data-idx="${idx}" data-field="role" class="w-full bg-transparent border-0 border-b border-transparent hover:border-slate-300 focus:border-emerald-500 focus:ring-0 p-0 text-xs font-medium text-slate-800">
+          </td>
+          <td class="py-2.5 pr-2">
+            <input type="number" value="${m.salary}" data-idx="${idx}" data-field="salary" min="0" step="100" class="w-24 bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs font-semibold focus:outline-none focus:border-emerald-500">
+          </td>
+          <td class="py-2.5 pr-2">
+            <input type="number" value="${m.hours}" data-idx="${idx}" data-field="hours" min="0" max="200" class="w-16 bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs font-semibold focus:outline-none focus:border-emerald-500">
+          </td>
+          <td class="py-2.5 text-right font-semibold text-slate-700">
+            ${formatCurrency(subtotal)}
+          </td>
+          <td class="py-2.5 text-center">
+            <button data-idx="${idx}" class="btn-remove-member text-slate-400 hover:text-red-500 transition-colors p-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+            </button>
+          </td>
+        `;
+        membersListEl.appendChild(tr);
+      });
+
+      calculateAll();
+    }
+
+    // Cálculo Geral de Métricas
+    function calculateAll() {
+      const focus = parseFloat(focusFactorEl.value) / 100 || 0.75;
+      const effectiveMonthlyHours = 176 * focus;
+
+      // 1. Equipe
+      let totalSprintTeamCost = 0;
+      let totalSprintHours = 0;
+      let totalMonthlyTeamCost = 0;
+
+      members.forEach(m => {
+        const hourlyRate = effectiveMonthlyHours > 0 ? (m.salary / effectiveMonthlyHours) : 0;
+        totalSprintTeamCost += hourlyRate * m.hours;
+        totalSprintHours += m.hours;
+        totalMonthlyTeamCost += m.salary;
+      });
+
+      // 2. Infraestrutura
+      const infraApi = parseFloat(infraApiEl.value) || 0;
+      const infraDb = parseFloat(infraDbEl.value) || 0;
+      const infraStorage = parseFloat(infraStorageEl.value) || 0;
+      const infraServices = parseFloat(infraServicesEl.value) || 0;
+      const totalMonthlyInfra = infraApi + infraDb + infraStorage + infraServices;
+
+      // 3. Parâmetros
+      const mvpSprints = parseInt(mvpSprintsEl.value) || 1;
+      const sprintDays = parseInt(sprintDaysEl.value) || 10;
+      const pointsPerSprint = parseFloat(sprintPointsEl.value) || 1;
+      const contingencyRate = (parseFloat(contingencyRateEl.value) || 0) / 100;
+      const targetBudget = parseFloat(totalBudgetEl.value) || 0;
+
+      // Duração do MVP em meses (1 Sprint de 10 dias úteis = 0.5 mês)
+      const mvpDurationMonths = (mvpSprints * sprintDays) / 22;
+
+      // Custos Consolidados
+      const mvpTeamCost = totalSprintTeamCost * mvpSprints;
+      const mvpInfraCost = totalMonthlyInfra * mvpDurationMonths;
+      const subtotalMvp = mvpTeamCost + mvpInfraCost;
+      const contingencyVal = subtotalMvp * contingencyRate;
+      const totalMvpCost = subtotalMvp + contingencyVal;
+
+      // Comparação com o Orçamento Teto Aprovado
+      const budgetDiff = targetBudget - totalMvpCost;
+      const percentUsed = targetBudget > 0 ? (totalMvpCost / targetBudget) * 100 : 0;
+
+      // Burn Rate e Runway
+      const monthlyBurnRate = totalMonthlyTeamCost + totalMonthlyInfra;
+      const runwayMonths = monthlyBurnRate > 0 ? (targetBudget / monthlyBurnRate) : 0;
+      const costPerPoint = pointsPerSprint > 0 ? (totalSprintTeamCost / pointsPerSprint) : 0;
+
+      // Atualização dos Cards
+      cardMvpTotal.innerText = formatCurrency(totalMvpCost);
+      cardTargetBudget.innerText = formatCurrency(targetBudget);
+      cardMvpSprintsCount.innerText = `${mvpSprints} Sprints (${(mvpSprints * (sprintDays / 5)).toFixed(0)} semanas)`;
+      cardMvpContingency.innerText = formatCurrency(contingencyVal);
+      cardBudgetPercent.innerText = `${percentUsed.toFixed(1)}%`;
+
+      // Barra e Status do Orçamento
+      budgetProgressBar.style.width = `${Math.min(percentUsed, 100)}%`;
+      if (budgetDiff >= 0) {
+        badgeBudgetStatus.className = 'px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+        badgeBudgetStatus.innerText = 'Dentro do Teto';
+        cardBudgetDiff.className = 'text-emerald-400 font-medium';
+        cardBudgetDiff.innerText = `+ ${formatCurrency(budgetDiff)} de saldo livre`;
+        budgetProgressBar.className = 'bg-emerald-500 h-2 rounded-full transition-all duration-300';
+      } else {
+        badgeBudgetStatus.className = 'px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30';
+        badgeBudgetStatus.innerText = 'Teto Ultrapassado';
+        cardBudgetDiff.className = 'text-rose-400 font-medium';
+        cardBudgetDiff.innerText = `- ${formatCurrency(Math.abs(budgetDiff))} de estouro`;
+        budgetProgressBar.className = 'bg-rose-500 h-2 rounded-full transition-all duration-300';
+      }
+
+      cardSprintCost.innerText = formatCurrency(totalSprintTeamCost);
+      cardSprintHours.innerText = `${totalSprintHours} h técnicas úteis`;
+
+      cardPointCost.innerText = formatCurrency(costPerPoint);
+      cardPointsRate.innerText = `Base: ${pointsPerSprint} pts/sprint`;
+
+      cardBurnRate.innerText = `${formatCurrency(monthlyBurnRate)}/mês`;
+      cardRunway.innerText = `${runwayMonths.toFixed(1)} meses`;
+
+      // Atualização do Markdown Gerado
+      generateMarkdown({
+        members,
+        focus,
+        effectiveMonthlyHours,
+        totalSprintTeamCost,
+        totalSprintHours,
+        infraApi,
+        infraDb,
+        infraStorage,
+        infraServices,
+        totalMonthlyInfra,
+        mvpSprints,
+        sprintDays,
+        pointsPerSprint,
+        costPerPoint,
+        contingencyRate,
+        contingencyVal,
+        totalMvpCost,
+        targetBudget,
+        budgetDiff,
+        percentUsed,
+        monthlyBurnRate,
+        runwayMonths
+      });
+    }
+
+    // Gerador de Tabela em Markdown
+    function generateMarkdown(data) {
+      let md = `## Estimativa de Custos e Orçamento do Software\n\n`;
+      md += `### 1. Equipe e Capacidade da Squad (Sprint de ${data.sprintDays} dias úteis)\n\n`;
+      md += `| Papel / Função | Custo Mensal Estimado | Custo / Hora Efetiva | Horas / Sprint | Subtotal da Sprint |\n`;
+      md += `| :--- | :--- | :--- | :--- | :--- |\n`;
+
+      data.members.forEach(m => {
+        const rate = data.effectiveMonthlyHours > 0 ? (m.salary / data.effectiveMonthlyHours) : 0;
+        const sub = rate * m.hours;
+        md += `| ${m.role} | ${formatCurrency(m.salary)} | ${formatCurrency(rate)} | ${m.hours} h | ${formatCurrency(sub)} |\n`;
+      });
+
+      md += `| **Total da Squad** | - | - | **${data.totalSprintHours} h** | **${formatCurrency(data.totalSprintTeamCost)}** |\n\n`;
+
+      md += `### 2. Infraestrutura em Nuvem (Custos Mensais)\n\n`;
+      md += `| Componente / Camada | Provedor / Serviço | Custo Mensal Estimado |\n`;
+      md += `| :--- | :--- | :--- |\n`;
+      md += `| API Backend | Render / Railway | ${formatCurrency(data.infraApi)} |\n`;
+      md += `| Banco de Dados | Supabase PostgreSQL | ${formatCurrency(data.infraDb)} |\n`;
+      md += `| Storage & CDN | Cloudflare R2 / S3 | ${formatCurrency(data.infraStorage)} |\n`;
+      md += `| Serviços & Mensageria | Resend / SendGrid | ${formatCurrency(data.infraServices)} |\n`;
+      md += `| **Total Infraestrutura** | - | **${formatCurrency(data.totalMonthlyInfra)} / mês** |\n\n`;
+
+      md += `### 3. Síntese do Projeto e Projeção do MVP\n\n`;
+      md += `- **Custo por Sprint (Equipe):** ${formatCurrency(data.totalSprintTeamCost)}\n`;
+      md += `- **Custo por Story Point:** ${formatCurrency(data.costPerPoint)} (Base: ${data.pointsPerSprint} pts/sprint)\n`;
+      md += `- **Burn Rate Mensal Operacional:** ${formatCurrency(data.monthlyBurnRate)} / mês\n`;
+      md += `- **Orçamento Teto Aprovado:** ${formatCurrency(data.targetBudget)}\n`;
+      md += `- **Custo Total Estimado do MVP (${data.mvpSprints} Sprints):** **${formatCurrency(data.totalMvpCost)}** (Comprometimento: ${data.percentUsed.toFixed(1)}%)\n`;
+      if (data.budgetDiff >= 0) {
+        md += `- **Saldo Livre de Orçamento:** ${formatCurrency(data.budgetDiff)} (Dentro do teto)\n`;
+      } else {
+        md += `- **Déficit de Orçamento:** ${formatCurrency(Math.abs(data.budgetDiff))} (Teto ultrapassado)\n`;
+      }
+
+      markdownOutput.value = md;
+    }
+
+    // Listeners de Eventos
+    document.addEventListener('input', (e) => {
+      if (e.target.dataset.field) {
+        const idx = parseInt(e.target.dataset.idx);
+        const field = e.target.dataset.field;
+        if (field === 'role') members[idx].role = e.target.value;
+        if (field === 'salary') members[idx].salary = parseFloat(e.target.value) || 0;
+        if (field === 'hours') members[idx].hours = parseFloat(e.target.value) || 0;
+        calculateAll();
+      } else if (e.target.classList.contains('calc-input') || e.target.id === 'sprint-days' || e.target.id === 'focus-factor') {
+        calculateAll();
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.btn-remove-member')) {
+        const btn = e.target.closest('.btn-remove-member');
+        const idx = parseInt(btn.dataset.idx);
+        if (members.length > 1) {
+          members.splice(idx, 1);
+          renderMembers();
+        }
+      }
+    });
+
+    document.getElementById('btn-add-member').addEventListener('click', () => {
+      members.push({ role: 'Novo Integrante', salary: 6000, hours: 60 });
+      renderMembers();
+    });
+
+    document.getElementById('btn-load-demo').addEventListener('click', () => {
+      members = JSON.parse(JSON.stringify(demoMembers));
+      infraApiEl.value = 35;
+      infraDbEl.value = 125;
+      infraStorageEl.value = 10;
+      infraServicesEl.value = 75;
+      mvpSprintsEl.value = 3;
+      sprintPointsEl.value = 25;
+      contingencyRateEl.value = 5;
+      totalBudgetEl.value = 60000;
+      renderMembers();
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      members = [{ role: 'Desenvolvedor', salary: 5000, hours: 60 }];
+      infraApiEl.value = 0;
+      infraDbEl.value = 0;
+      infraStorageEl.value = 0;
+      infraServicesEl.value = 0;
+      mvpSprintsEl.value = 1;
+      sprintPointsEl.value = 20;
+      contingencyRateEl.value = 0;
+      totalBudgetEl.value = 0;
+      renderMembers();
+    });
+
+    // Copiar Markdown
+    document.getElementById('btn-copy-md').addEventListener('click', () => {
+      markdownOutput.select();
+      navigator.clipboard.writeText(markdownOutput.value);
+      const copyText = document.getElementById('copy-text');
+      copyText.innerText = 'Copiado!';
+      setTimeout(() => { copyText.innerText = 'Copiar Markdown'; }, 2000);
+    });
+
+    // Inicialização
+    renderMembers();
+  </script>
+</body>
+</html>
